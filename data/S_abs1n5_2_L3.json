@@ -1,0 +1,68 @@
+{
+  "numNodes": 6,
+  "numTimePeriods": 3,
+  "vehicleCapacity": 144.0,
+  "vehicleCostPerKm": 1.0,
+  "vehicleSpeekKmHr": 150.0,
+  "numVehicles": 2,
+  "manufacturer": {
+    "id": 0,
+    "x": 154.0,
+    "y": 417.0,
+    "startingInventory": 510.0,
+    "dailyProduction": 193.0,
+    "inventoryCost": 0.03
+  },
+  "retailers": [
+    {
+      "id": 1,
+      "x": 172.0,
+      "y": 334.0,
+      "startingInventory": 130.0,
+      "maxInventory": 195.0,
+      "minInventory": 0.0,
+      "dailyConsumption": 65.0,
+      "inventoryCost": 0.02
+    },
+    {
+      "id": 2,
+      "x": 267.0,
+      "y": 87.0,
+      "startingInventory": 70.0,
+      "maxInventory": 105.0,
+      "minInventory": 0.0,
+      "dailyConsumption": 35.0,
+      "inventoryCost": 0.03
+    },
+    {
+      "id": 3,
+      "x": 148.0,
+      "y": 433.0,
+      "startingInventory": 58.0,
+      "maxInventory": 116.0,
+      "minInventory": 0.0,
+      "dailyConsumption": 58.0,
+      "inventoryCost": 0.03
+    },
+    {
+      "id": 4,
+      "x": 355.0,
+      "y": 444.0,
+      "startingInventory": 48.0,
+      "maxInventory": 72.0,
+      "minInventory": 0.0,
+      "dailyConsumption": 24.0,
+      "inventoryCost": 0.02
+    },
+    {
+      "id": 5,
+      "x": 38.0,
+      "y": 152.0,
+      "startingInventory": 11.0,
+      "maxInventory": 22.0,
+      "minInventory": 0.0,
+      "dailyConsumption": 11.0,
+      "inventoryCost": 0.02
+    }
+  ]
+}
