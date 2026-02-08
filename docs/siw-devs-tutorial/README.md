@@ -24,250 +24,92 @@ This tutorial runs on [GitHub Codespaces](https://github.com/features/codespaces
 ## Quick Start (Recommended: Codespaces)
 
 1. Click **Code → Open in Codespaces**
-2. Wait for the environment to build.  It takes a little while to download all Maven dependencies and compile DEVS Streaming Frarmework.
-3. Open a terminal
-4. Make sure you are on the siw-devs-tutorial-starter branch.  If not run
-```
-git fetch
-git switch -c branch-name origin/siw-devs-tutorial-starter
-```
+2. Wait for the environment to build, to inlcude activating the extensions.  
+3. The UI will ask you for a build configuration, select debug.
+4. Then cmake will build the project.
+5. The Run and Debug tool (select in left margin) will have both a Run and Debug configuration to select.
+6. Run the model
 
-5. Run:
-
-```
-mvn clean install
-```
-
-You should see:
-
-* project builds
-* tests run
-* The RetailerImplTest fails because you will have to implement it.
+* adevs_irp fails because Repailer.cpp still needs and implementataion.
 
 ---
 
 ## Quick Start (Local Machine)
-
 ```
-git clone https://github.com/simlytics-cloud/devs-streaming.git
-cd devs-streaming
-mvn -DskipTests install
-```
-Wait a bit for DEVS Streaming Framework to download all dependecies and build.  After build succes:
-```
-cd ..
-git clone https://github.com/simlytics-cloud/irp-java.git
-cd irp-java
+git clone https://github.com/simlytics-cloud/irp-adevs
+cd irp-adevs
 git fetch
 git switch -c branch-name origin/siw-devs-tutorial-starter
-mvn install
 ```
-* Project builds
-* Tests run
-  *The RetailerImplTest fails because you will have to implement it.
+* Build with cmake
+* Run adevs_irp executable
+* adevs_irp fails because Repailer.cpp still needs and implementataion.
 
 
 
 ## Retailer Model Tutorial — Scheduled DEVS Implementation Guide
 
-This tutorial page explains how the **Retailer** model is implemented for the Inventory Routing Problem using the DEVS Streaming Framework model pattern. It provides the architectural background needed to complete the `RetailerImpl` exercise class.
+This tutorial page explains how the **Retailer** model is implemented for the Inventory Routing Problem using the adevs. It provides the architectural background needed to complete the `Retailer.cpp` exercise class.
 
-The Retailer model is built using the DEVS Streaming Framework’s [ScheduledDevsModel](https://github.com/simlytics-cloud/devs-streaming/blob/main/src/main/java/devs/ScheduledDevsModel.java). Much of the simulation timing and event mechanics are already implemented in the framework. Your job is to implement the domain behavior, not the simulation engine mechanics.
+The Retailer model is built using adevs [adevs](https://web.ornl.gov/~nutarojj/adevs/docs/index.html). Much of the simulation timing and event mechanics are already implemented in the framework. Your job is to implement the domain behavior, not the simulation engine mechanics.
 
-The inheritance chain is:
+Before getting into the tutorial, take a few minutes to browse the adevs documentation page
+for [Atomic Models](https://web.ornl.gov/~nutarojj/adevs/docs/manual/node5.html).  This shows an
+implementation of a single server queueing Clerk model.  Additional information can be found
+in the [adevs API documentationi](https://web.ornl.gov/~nutarojj/adevs/docs/api/hierarchy.html).
 
+The [Retailer.h](../../src/irpmodel/Retailer.h) header file has the structure of the Retailer.
+It is a template class where input is of type [IrpEvent](../../src/irp-iso/irpdomain/IrpEvent.h).
+This is an abstract class where the actual input [Delivery](../../src/irp-iso/irpdomain/Delivery.h) and
+output [InventoryCost](../../src/irp-iso/irpdomain/InventoryCost.h) are subclasses.  Ports are defined using the `std::string` type, and time is `long` integers represenint the minutes since the start of Day 1 at 00:00.  Also notice the definition of retailer events:
 ```
-ScheduledDevsModel (DEVS Streaming Framework)
-    ↑
-Facility (generated)
-    ↑
-Retailer (generated)
-    ↑
-RetailerImpl (your implementation)
+  private:
+    enum class RetailerEventType {OPEN, CLOSE};
+    struct RetailerEvent {
+      RetailerEventType eventType;
+      long time;
+    };
 ```
+We will use these event types in our implementation.  The `const` attributes do not change over
+the life of a retailer, but the `currentInventory`, `nextEvent`, and `currentTime` will.
 
-## ScheduledDevsModel Execution Model
-
-A typical DEVS atomic model reasons about time using a time advance functions and state transitions.
-While this logic is mathematically necessary and succinct for DEVS formulation, it is different
-than how simulation developers typically think about models with a clock and event schedule.  A
-[ScheduledDevsModel](https://github.com/simlytics-cloud/devs-streaming/blob/main/src/main/java/devs/ScheduledDevsModel.java)
-provides a DEVS compliant atomic model with an internal schedule.  Its internal state has a schedule, a time-ordered
-TreeMap with a list of events and outputs at each time.
-
-Because of this, the framework already implements several DEVS functions for you.
-
-### Time Advance Function
-
-The time advance function is already implemented.
-
-Behavior:
-
-* Returns the interval between:
-
-    * current simulation time
-    * the first scheduled item in the schedule
-
-You do not implement time advance yourself.
-
-
-### Output Function
-
-The output function is already implemented.
-
-Behavior:
-
-* Returns a **bag of PortValues**
-* Includes all outputs scheduled for the current simulation time
-
-Outputs are pulled directly from the schedule.
-
-
-### Internal State Transition
-
-The internal transition function is also implemented by the framework.
-
-It automatically:
-
-* Advances current simulation time
-* Removes published outputs from the schedule
-* Retrieves all scheduled internal events at the current time
-* Passes those events to your handler method
-
-You do NOT override the internal transition directly.
-
-Instead, you implement:
-
-```
-public void handleScheduledEvents(List<Object> events)
-```
-
-This is where your model reacts to scheduled internal events.
-
-
-### Working with the Schedule
-
-The schedule supports both internal events and scheduled outputs.
-A common pattern is to define **inner classes** to represent internal events.
-
-
-Example — schedule a store opening event 6 hours after simulation start:
-
-```java
-modelState.getSchedule().scheduleInternalEvent(
-    LongSimTime.create(60 * 6),
-    new OpenEvent()
-);
-```
-
-Typical usage:
-
-* define small inner event classes
-* schedule them at future times
-* handle them inside `handleScheduledEvents`
-
-
-You can schedule output port values directly onto the schedule.
-
-Example — publish daily inventory cost on the Retailers dailyInventoryCost port:
-
-```java
-modelState.getSchedule().scheduleOutput(
-    currentTime, // Time of the scheduled output
-    Retailer.dailyInventoryCost, // Port on which to place the output
-    immutableInventoryCost // The output data structure consitent with the port type
-);
-```
-
-These outputs will automatically be emitted by the framework output function at the scheduled time.
-
----
-
-## Role of the Generated Classes
-
-Much of the DEVS struture for this project was automatically generated into the [generated](../../generated/src/main/java/iso/example/irpsystem/) package.  You should not edit this code.  However the following classes help you understand the Retailer's implementation.
-
-* [Facility](../../generated/src/main/java/iso/example/irpsystem/irpmodel/InventoryRouting/Facility.java) class is a lightweight shared parent class.  It holds shared state values and properties common to [Retailers](../../generated/src/main/java/iso/example/irpsystem/irpmodel/InventoryRouting/Retailer.java) and [Manufacturers](../../generated/src/main/java/iso/example/irpsystem/irpmodel/InventoryRouting/Manufacturer.java) class
-
-* [Retailer](../../generated/src/main/java/iso/example/irpsystem/irpmodel/InventoryRouting/Retailer.java) is an abstract class that contains the internal state and structure of the retailers.  Static data is on its `properties` field, and dynamic data is in its `modelState`.  Its ports are defined as `public static final ImmutablePort<>` with a port name and data type.
-
-The Retailer model includes an external transition that is already partially implemented.
-
-* Advances current time correctly
-* Iterates over incoming PortValues
-* Dispatches by port name and value type
-
-Incoming deliveries are forwarded to:
-
-```
-handleReceiveDelivery(
-    ImmutableDelivery immutableDelivery,
-    LongSimTime elapsedTime
-)
-```
-
-You are responsible for completing this handler.
-
----
 
 ### What You Must Implement
 
-For the Retailer tutorial exercise, you must complete the domain logic for:
+For the Retailer tutorial exercise, you must complete the domain logic for a [Retailer.cpp](../../src/irpmodel/Retailer.cpp) implementation.
 
-
-Implement handling of deliveries at the `receiveDelivery` port
-
-```
-handleReceiveDelivery(...)
-```
-
-Implement handling of internal events, `OpenEvent` and `CloseEvent`
+Implement handling of CLOSE and OPEN events in the internal state transition function
 
 ```
-handleScheduledEvents(List<Object> events)
+void Retailer::delta_int()
 ```
 
+Implement handling of deliveries at the `receiveDelivery` port in the external state transition function.
 
-Implement the confluent transition behavior where internal and external events occur at the same simulation time.  A typical strategy is to decide whether you want to handle the input before or after
-the internal event.  Based on that decisioin, call `externalStateTransitionFunction(LongSimTime.create(0), inputs);`
-and `internalStateTransitionFunction();` in the corresponding order.
-
-
-### Time Representation
-
-Simulation time uses `LongSimTime`.  This represents minutes since simulation start. To get the minutes:
-
-```java
-long minutes = currentTime.getT();
+```
+void Retailer::delta_ext(long e, const adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>& xb)
 ```
 
-To create a new value:
+Implement the confluent state transition function.
 
-```java
-LongSimTime scheduledEventTime = LongSimTime.create(60 * 14);
+```
+void Retailer::delta_ext(long e, const adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>& xb)
 ```
 
-Use this for:
+Implement the output function to sent InventoryCost to the dailyInventoryCost ouput port.
 
-* computing delays
-* scheduling future events
-* calculating costs or penalties
+```
+void Retailer::output_func(adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>& yb) 
+```
 
----
+Implement the time advance function.
+```
+long Retailer::ta()
+```
 
-## Implementation Strategy
+To test your implementation, you will run the adevs_irp test listed in the [main.cpp](../../src/irpmodeltest/main.cpp).  It builds a DEVS experimental frame where the [RetailerTestGenerator](../../src/irpmodeltest/ReceiverTestGenerator.h) generates two deliveries at noon each day to the retailer.  The retailer processes the deliveries and executes transition over two days, passing its output to the [RetailerTestAcceptor](../../src/irpmodeltest/RetailerTestAcceptor.h), which validates the correct behavior.
 
-
-1. Read generated [Retailer](../../generated/src/main/java/iso/example/irpsystem/irpmodel/InventoryRouting/Retailer.java) class
-2. Review [ScheduledDevsModel](https://github.com/simlytics-cloud/devs-streaming/blob/main/src/main/java/devs/ScheduledDevsModel.java) schedule and understand its handler pattern.
-3. Study [ManufacturerImpl](../../impl/src/main/java/iso/example/irpsystem/irpmodel/impl/ManufacturerImpl.java) as a complete example.
-4. Open [RetailerImpl](../../impl/src/main/java/iso/example/irpsystem/irpmodel/impl/RetailerImpl.java).  Look for the TODO tags
-4. Implement delivery handler
-5. Implement scheduled event handler
-6. Implement confluent logic
-7. Run [RetailerImplTest](../../impl/src/test/java/iso/example/irpsystem/irpmodel/impl/RetailerImplTest.java)
-
-If your implementation is correct, you should get a passed test.
+If your implementation is correct, you should get a passed test.  Use the debugger judiciously to test your partial implementation.
 
 If you get stuck, the solution is on the siw-devs-tutorial-solution branch.
 
