@@ -5,6 +5,19 @@
 
 #include <string>
 
+/**
+ * @class RetailerTestAcceptor
+ * @brief A simulation component used to validate the inventory cost behavior of a retailer in a discrete-event system.
+ *
+ * This class is an extension of the adevs::Atomic model that acts as a test acceptor
+ * for verifying cost-reported events during simulation. The validation involves checking
+ * whether the received inventory cost matches the expected values for specific simulation days.
+ *
+ * The expected costs for day 1 and day 2 are provided during initialization.
+ *
+ * The class also ensures the correctness of event ordering and performs error handling for
+ * scenarios where unexpected or extra events are received.
+ */
 class RetailerTestAcceptor
     : public adevs::Atomic<adevs::PortValue<IrpEvent*, std::string>, long>
 {

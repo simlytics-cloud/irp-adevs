@@ -13,13 +13,22 @@
 
 #include <iostream>
 
-#include "../irpmodel/IrpData.h"
-
+/**
+ * @brief The main function initializes and runs an inventory simulation
+ * for a retailer over a two-day period.
+ *
+ * The function sets up various components required for the simulation,
+ * including the retailer, generator for deliveries, and acceptor for
+ * verifying results. It integrates these components into a simulation
+ * model, defines couplings among them, and executes a discrete event
+ * simulation for a specific duration. The simulation models the behavior
+ * of a retailer handling inventory and delivery events, verifying outputs
+ * against expected results.
+ *
+ * @return Returns 0 upon successful execution of the program.
+ */
 int main()
 {
-    const IrpData irp_data = IrpData::fromJsonFile("../data/S_abs1n5_2_L3.json");
-    std::cout << "Loaded IrpData: numNodes=" << irp_data.numNodes
-              << ", numTimePeriods=" << irp_data.numTimePeriods << "\n";
 
     // --- Build components ---
     const Coordinate retailerCoord(172.0, 334.0);

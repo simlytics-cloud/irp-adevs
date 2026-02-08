@@ -1,12 +1,15 @@
 #pragma once
 
-#include "devs/JsonSerializable.h"
-#include <nlohmann/json.hpp>
-
-class IrpEvent : public JsonSerializable {
+/**
+ * @class IrpEvent
+ * @brief A base class representing immutable events in the IRP (Inventory Routing Problem) domain.
+ *
+ * IrpEvent serves as an abstract base class for all event types in the system,
+ * enabling safe polymorphic behavior and deletion. Subclasses define specific
+ * types of IRP-related events.
+ */
+class IrpEvent  {
   public:
-    ~IrpEvent() override = default; // enables safe polymorphic deletion
+    virtual ~IrpEvent() = default; // enables safe polymorphic deletion
 
-    json toJson() { return toJsonValue(); }
-    static IrpEvent* fromJson(const json& j);
 };

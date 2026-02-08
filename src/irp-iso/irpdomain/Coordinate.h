@@ -1,11 +1,26 @@
 #pragma once
 
-#include "devs/JsonSerializable.h"
-#include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
-
-class Coordinate : public JsonSerializable {
+/**
+ * @class Coordinate
+ * @brief Represents a two-dimensional coordinate in Cartesian space.
+ *
+ * The Coordinate class encapsulates an immutable (x, y) pair to describe a location
+ * in a two-dimensional Cartesian coordinate system.
+ *
+ * This class is designed to be lightweight and is eligible for constexpr evaluation,
+ * enabling compile-time computation in certain contexts.
+ *
+ * The class is immutable, as the x and y members are constants and cannot be modified
+ * after object construction.
+ *
+ * Constructor:
+ * - The default constructor is explicitly deleted, ensuring that coordinates must
+ *   be explicitly initialized with valid x and y values.
+ * - A constexpr constructor is provided to initialize x and y with user-specified
+ *   double values.
+ */
+class Coordinate {
   public:
     const double x;
     const double y;
@@ -15,12 +30,4 @@ class Coordinate : public JsonSerializable {
     constexpr Coordinate(double xIn, double yIn)
         : x(xIn), y(yIn) {}
 
-    json toJsonValue() override
-    {
-        return json{
-            {"@class", "iso.example.irpsystem.irpdomain.ImmutableCoordinate"},
-            {"x", x},
-            {"y", y},
-        };
-    }
 };

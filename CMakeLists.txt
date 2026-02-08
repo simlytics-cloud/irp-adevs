@@ -7,20 +7,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(ADEVS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../adevs-3.3")
 set(DEVS_SF_DIR "/Users/robertkewley/Library/CloudStorage/OneDrive-simlytics.cloud/Simlytics/dev/simlytics/devs/cpp/devs-sf-cpp/_install")
 
-# Default "local install" inside the tutorial folder (can still be overridden by user)
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/_install" CACHE PATH "" FORCE)
-endif()
-
-find_package(nlohmann_json REQUIRED)
 
 # ----------------------------
 # Library target: IrpModel
 # ----------------------------
 add_library(IrpModel STATIC
         src/irpmodel/Retailer.cpp
-        src/irp-iso/irpdomain/IrpEvent.cpp
-        src/irpmodel/IrpData.h
 )
 
 include_directories(
@@ -32,7 +24,6 @@ target_include_directories(IrpModel PUBLIC
         "${DEVS_SF_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/irpmodel"
 )
-target_link_libraries(IrpModel PUBLIC nlohmann_json::nlohmann_json)
 
 if (MSVC)
     target_compile_options(IrpModel PRIVATE /W4)
@@ -51,14 +42,13 @@ add_executable(adevs_irp src/irpmodeltest/main.cpp
         src/irp-iso/irpdomain/FacilityProps.h
         src/irpmodeltest/ReceiverTestGenerator.cpp
         src/irpmodeltest/RetailerTestAcceptor.cpp
-        src/irpmodel/IrpData.h)
+)
 
 target_include_directories(adevs_irp PRIVATE
         "src/irp-iso/irpdomain"
         "${DEVS_SF_DIR}/include"
 )
 
-target_link_libraries(adevs_irp PUBLIC nlohmann_json::nlohmann_json)
 
 if (MSVC)
     target_compile_options(adevs_irp PRIVATE /W4)
@@ -66,7 +56,7 @@ else()
     target_compile_options(adevs_irp PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-add_subdirectory("src/irp-iso")
+
 # ----------------------------
 include(GNUInstallDirs)
 

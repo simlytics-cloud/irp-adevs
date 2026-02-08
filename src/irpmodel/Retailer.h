@@ -6,6 +6,15 @@
 
 constexpr long minutesPerDay = 24 * 60;
 
+/**
+ * @class Retailer
+ * @brief Represents a retailer simulation entity in a discrete event system.
+ *
+ * The Retailer class inherits from adevs::Atomic and models a retailer with inventory management capabilities.
+ * It interacts with the simulation environment through input and output ports identified by strings.
+ *
+ * The class simulates inventory dynamics, including receiving deliveries and calculating inventory-related costs.
+ */
 class Retailer: public adevs::Atomic<adevs::PortValue<IrpEvent*, std::string>, long> {
   public:
     // Ports.  Note using string as port identifier instead of the default int

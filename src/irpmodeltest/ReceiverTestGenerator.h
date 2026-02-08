@@ -5,6 +5,21 @@
 
 #include <string>
 
+/**
+ * @brief A test generator class for simulating deliveries to a receiver using the adevs DEVS (Discrete Event System Specification) framework.
+ *
+ * This class represents a generator that simulates the sending of delivery events over two days.
+ * It generates events at specific times and associates them with a retailer and delivery amount.
+ * The generated events are transmitted via a specified port.
+ *
+ * @details
+ * The `ReceiverTestGenerator` is derived from `adevs::Atomic`, representing an atomic DEVS model.
+ * It overrides the core DEVS lifecycle methods (`delta_int`, `delta_ext`, `delta_conf`, `output_func`, `ta`, and `gc_output`)
+ * for state transitions, external event handling, output generation, and garbage collection.
+ *
+ * The simulation logic involves creating and emitting delivery events at designated times (noon on day 1 and day 2).
+ * The class maintains internal state to track the current time and determines whether additional deliveries need to be generated.
+ */
 class ReceiverTestGenerator : public adevs::Atomic<adevs::PortValue<IrpEvent*, std::string>, long>
 {
   public:
