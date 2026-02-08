@@ -7,8 +7,7 @@ project(adevs_irp)
 set(CMAKE_CXX_STANDARD 17)
 
 # Adjust if your adevs-3.3 is elsewhere
-set(ADEVS_DIR "${CMAKE_CURRENT_SOURCE_DIR}adevs-3.3")
-set(DEVS_SF_DIR "/Users/robertkewley/Library/CloudStorage/OneDrive-simlytics.cloud/Simlytics/dev/simlytics/devs/cpp/devs-sf-cpp/_install")
+set(ADEVS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/adevs-3.3")
 
 
 # ----------------------------
