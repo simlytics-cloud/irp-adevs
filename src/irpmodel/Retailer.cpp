@@ -46,15 +46,9 @@ void Retailer::delta_int()
 {
   currentTime = currentTime + ta();
   if (nextEvent.eventType == RetailerEventType::OPEN) {
-    nextEvent = RetailerEvent{RetailerEventType::CLOSE, currentTime + 10 * 60};
+    // TODO Implement retailer opening behavior
   } else {
-    currentInventory = currentInventory - dailyConsumption;
-    nextEvent = RetailerEvent{RetailerEventType::OPEN, currentTime + 14 * 60};
-    if (currentInventory < minInventory) {
-      throw new std::invalid_argument("Retailer::delta_int: inventory below min");
-    } else if (currentInventory > maxInventory) {
-      throw new std::invalid_argument("Retailer::delta_int: inventory above max");
-    }
+    // TODO Implement retailer closing behavior
   }
 }
 
@@ -94,7 +88,7 @@ void Retailer::delta_ext(long e, const adevs::Bag<adevs::PortValue<IrpEvent*, st
     const auto* delivery = dynamic_cast<const Delivery*>(evt);
     if (delivery != nullptr)
     {
-      currentInventory += delivery->productAmount;
+      // TODO Implement behavior upon receipt of a Delivery
     }
     else
     {
@@ -117,8 +111,7 @@ void Retailer::delta_ext(long e, const adevs::Bag<adevs::PortValue<IrpEvent*, st
  */
 void Retailer::delta_conf(const adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>& xb)
 {
-  delta_ext(0.0, xb);
-  delta_int();
+  // TODO Implement confluent state transition
 }
 
 /**
@@ -144,16 +137,7 @@ void Retailer::delta_conf(const adevs::Bag<adevs::PortValue<IrpEvent*, std::stri
  *           with the event to be sent.
  */
 void Retailer::output_func(adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>& yb) {
-  if (nextEvent.eventType == RetailerEventType::CLOSE) {
-    const int day = static_cast<int>(currentTime / minutesPerDay) + 1;
-
-    const double cost = (currentInventory - dailyConsumption) * facilityProperties.inventoryCost;
-
-    auto* irp_event = static_cast<IrpEvent*>(new InventoryCost(day, retailerId, cost));
-    adevs::PortValue<IrpEvent*, std::string> pv = adevs::PortValue<IrpEvent*, std::string>(dailyInventoryCost, irp_event);
-
-    yb.insert(pv);
-  }
+  // TODO Implement output function
 }
 
 /**
@@ -167,7 +151,8 @@ void Retailer::output_func(adevs::Bag<adevs::PortValue<IrpEvent*, std::string>>&
  */
 long Retailer::ta()
 {
-  return nextEvent.time - currentTime;
+  // TODO Update implementation for correct Retailer time acvance
+  return std::numeric_limits<long>::max();
 }
 
 /**
