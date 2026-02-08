@@ -47,7 +47,7 @@ git switch -c branch-name origin/siw-devs-tutorial-starter
 
 
 
-## Retailer Model Tutorial — Scheduled DEVS Implementation Guide
+## Retailer Model Tutorial — adevs Guide
 
 This tutorial page explains how the **Retailer** model is implemented for the Inventory Routing Problem using the adevs. It provides the architectural background needed to complete the `Retailer.cpp` exercise class.
 
@@ -76,7 +76,7 @@ the life of a retailer, but the `currentInventory`, `nextEvent`, and `currentTim
 
 ### What You Must Implement
 
-For the Retailer tutorial exercise, you must complete the domain logic for a [Retailer.cpp](../../src/irpmodel/Retailer.cpp) implementation.
+For the Retailer tutorial exercise, you must complete the domain logic for a [Retailer.cpp](../../src/irpmodel/Retailer.cpp) implementation.  Look for the `// TODO` tags.
 
 Implement handling of CLOSE and OPEN events in the internal state transition function
 
