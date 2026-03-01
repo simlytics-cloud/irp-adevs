@@ -6,6 +6,7 @@
 #include "adevs.h"
 #include "../irpdomain/Delivery.h"
 #include "../irpdomain/InventoryCost.h"
+#include "../irpdomain/VehicleCost.h"
 
 
 using namespace adevs;
@@ -30,6 +31,15 @@ int main(int argc, char** argv) {
 			return new PortValueMessage<IrpEvent *, std::string>(
 				jv.at("portName").get<std::string>(),
 				"iso.example.irpsystem.irpdomain.ImmutableInventoryCost",
+				IrpEvent::fromJson(jv.at("value"))
+			);
+		});
+	PortValueMessageRegistry::getInstance().registerCustomCreator(
+		"iso.example.irpsystem.irpdomain.ImmutableVehicleCost",
+		[](nlohmann::json jv) {
+			return new PortValueMessage<IrpEvent *, std::string>(
+				jv.at("portName").get<std::string>(),
+				"iso.example.irpsystem.irpdomain.ImmutableVehicleCost",
 				IrpEvent::fromJson(jv.at("value"))
 			);
 		});
@@ -163,6 +173,62 @@ int main(int argc, char** argv) {
 	}
 	if (inventoryCost->cost != 2.1) {
 		throw std::invalid_argument("InventoryCost message had wrong cost");
+	}
+
+	// Test VehicleCost
+	jv = json::parse(R"JSON(
+{
+	"messageType": "OutputReport",
+	"eventTime": 960,
+	"payload": {
+		"@class": "devs.iso.OutputReportPayload",
+		"outputs": [
+			{
+				"value": {
+					"@class": "iso.example.irpsystem.irpdomain.ImmutableVehicleCost",
+					"day": 1,
+					"vehicleId": 3,
+					"cost": 45.5
+				},
+				"portName": "dailyVehicleCost"
+			}
+		]
+	},
+	"simulationId": "InventoryRoutingApp",
+	"messageId": "588317be-cb6f-4cbb-abe3-72f731f96665",
+	"senderId": "manufacturer",
+	"receiverId": "inventoryRouting",
+	"nextInternalTime": 960
+})JSON");
+
+	devsMessage = devsMessageFactory->fromJsonValue(jv);
+	if (devsMessage->getDevsMessageType() == DevsMessage::OUTPUT_REPORT) {
+		outputReport = dynamic_cast<OutputReport*>(devsMessage);
+	} else {
+		throw std::invalid_argument("Output report message was not OutputReport (VehicleCost)");
+	}
+
+	outputs = outputReport->getOutputs();
+
+	if (outputs.empty() || outputs[0] == nullptr) {
+		throw std::invalid_argument("OutputReport outputs were empty (expected a VehicleCost)");
+	}
+
+	output0 = dynamic_cast<PortValueMessage<IrpEvent*, std::string>*>(outputs[0]);
+	irpEvent = output0->getValue();
+	auto* vehicleCost = dynamic_cast<VehicleCost*>(irpEvent);
+
+	if (vehicleCost == nullptr) {
+		throw std::invalid_argument("VehicleCost message was not VehicleCost");
+	}
+	if (vehicleCost->day != 1) {
+		throw std::invalid_argument("VehicleCost message had wrong day");
+	}
+	if (vehicleCost->vehicleId != 3) {
+		throw std::invalid_argument("VehicleCost message had wrong vehicleId");
+	}
+	if (vehicleCost->cost != 45.5) {
+		throw std::invalid_argument("VehicleCost message had wrong cost");
 	}
 
     cout << "IRP message test succeeded!!" << endl;

@@ -15,29 +15,36 @@
 
 #include "../irpmodel/IrpData.h"
 
+#ifndef TEST_DATA_DIR
+#define TEST_DATA_DIR "data"
+#endif
+
 int main()
 {
-    const IrpData irp_data = IrpData::fromJsonFile("../data/S_abs1n5_2_L3.json");
+    std::string dataPath = std::string(TEST_DATA_DIR) + "/S_abs1n5_2_L3.json";
+    const IrpData irp_data = IrpData::fromJsonFile(dataPath);
     std::cout << "Loaded IrpData: numNodes=" << irp_data.numNodes
               << ", numTimePeriods=" << irp_data.numTimePeriods << "\n";
 
-    // --- Build components ---
-    const Coordinate retailerCoord(172.0, 334.0);
-    const FacilityProps props(retailerCoord, /*startingInventory*/ 70.0, /*inventoryCost*/ 0.03);
+    // --- Build components from IrpData ---
+    const int retailerIdx = 1; // "retailer1"
+    const auto& rd = irp_data.retailers[retailerIdx];
 
-    const int retailerId = 2;
+    const Coordinate retailerCoord(rd.x, rd.y);
+    const FacilityProps props(retailerCoord, rd.startingInventory, rd.inventoryCost);
+
+    const int retailerId = rd.id;
 
     // Retailer
     Retailer *retailer = new Retailer(
         props,
-        /*currentInventory*/
         retailerId,
         /*minInventory*/
-        0.0,
+        rd.minInventory,
         /*maxInventory*/
-        105.0,
+        rd.maxInventory,
         /*dailyConsumption*/
-        35.0
+        rd.dailyConsumption
     );
 
     // Generator: two deliveries at noon day 1 and noon day 2
@@ -52,13 +59,15 @@ int main()
 
     // Acceptor: expects 2 InventoryCost events with known costs
     // These expected costs must match your Retailer::output_func calculation.
-    // Here, inventoryCost=1.0 and consumption=0.0, so cost == currentInventory at 4pm.
+    // Day 1: (startingInventory - dailyConsumption + amountDay1) * inventoryCost
+    // (70.0 - 35.0 + 35.0) * 0.03 = 70.0 * 0.03 = 2.1
+    // Day 2: (70.0 - 35.0 + 17.5) * 0.03 = 52.5 * 0.03 = 1.575
     RetailerTestAcceptor *acceptor = new RetailerTestAcceptor(
         retailerId,
         /*expectedDay1Cost*/
-        2.1,
+        (rd.startingInventory - rd.dailyConsumption + 35.0) * rd.inventoryCost,
         /*expectedDay2Cost*/
-        1.575
+        (rd.startingInventory - rd.dailyConsumption + 17.5) * rd.inventoryCost
     );
 
     // --- Build digraph ---

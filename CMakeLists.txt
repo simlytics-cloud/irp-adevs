@@ -19,6 +19,10 @@ find_package(nlohmann_json REQUIRED)
 # ----------------------------
 add_library(IrpModel STATIC
         src/irpmodel/Retailer.cpp
+        src/irpmodel/Manufacturer.cpp
+        src/irpmodel/Manufacturer.h
+        src/irpmodel/Vehicle.cpp
+        src/irpmodel/Vehicle.h
         src/irp-iso/irpdomain/IrpEvent.cpp
         src/irpmodel/IrpData.h
 )
@@ -40,33 +44,8 @@ else()
     target_compile_options(IrpModel PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-# ----------------------------
-# Executable (tutorial runner)
-# ----------------------------
-add_executable(adevs_irp src/irpmodeltest/main.cpp
-        src/irp-iso/irpdomain/Delivery.h
-        src/irp-iso/irpdomain/InventoryCost.h
-        src/irp-iso/irpdomain/Coordinate.h
-        src/irpmodel/Retailer.cpp
-        src/irp-iso/irpdomain/FacilityProps.h
-        src/irpmodeltest/ReceiverTestGenerator.cpp
-        src/irpmodeltest/RetailerTestAcceptor.cpp
-        src/irpmodel/IrpData.h)
-
-target_include_directories(adevs_irp PRIVATE
-        "src/irp-iso/irpdomain"
-        "${DEVS_SF_DIR}/include"
-)
-
-target_link_libraries(adevs_irp PUBLIC nlohmann_json::nlohmann_json)
-
-if (MSVC)
-    target_compile_options(adevs_irp PRIVATE /W4)
-else()
-    target_compile_options(adevs_irp PRIVATE -Wall -Wextra -pedantic)
-endif()
-
 add_subdirectory("src/irp-iso")
+add_subdirectory("src/irpmodeltest")
 # ----------------------------
 include(GNUInstallDirs)
 

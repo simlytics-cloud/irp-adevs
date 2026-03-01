@@ -19,19 +19,61 @@ include_directories(${modern-cpp-kafka_INCLUDE_DIRS})
 set(DEVS_SF_DIR "/Users/robertkewley/Library/CloudStorage/OneDrive-simlytics.cloud/Simlytics/dev/simlytics/devs/cpp/devs-sf-cpp/_install")
 
 
-add_executable(irp-remote
-        irp-remote-main.cpp
-        KafkaRetailerSimulator.cpp
+add_executable(retailer_remote
+        retailer-remote.cpp
         RetailerStreamingSimulator.cpp
 )
 
-target_include_directories(irp-remote PRIVATE
+target_include_directories(retailer_remote PRIVATE
         "${DEVS_SF_DIR}/include"
+        "${DEVS_SF_DIR}/include/devs"
         "irpdomain"
         "${PROJECT_SOURCE_DIR}/src/irpmodel"
 )
 
-target_link_libraries(irp-remote PUBLIC
+target_compile_definitions(retailer_remote PRIVATE TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+
+target_link_libraries(retailer_remote PUBLIC
+        "${DEVS_SF_DIR}/lib/libdevs_sf.a"
+        nlohmann_json::nlohmann_json
+        IrpModel
+)
+
+add_executable(manufacturer-remote
+        manufacturer-remote.cpp
+        ManufacturerStreamingSimulator.cpp
+)
+
+target_include_directories(manufacturer-remote PRIVATE
+        "${DEVS_SF_DIR}/include"
+        "${DEVS_SF_DIR}/include/devs"
+        "irpdomain"
+        "${PROJECT_SOURCE_DIR}/src/irpmodel"
+)
+
+target_compile_definitions(manufacturer-remote PRIVATE TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+
+target_link_libraries(manufacturer-remote PUBLIC
+        "${DEVS_SF_DIR}/lib/libdevs_sf.a"
+        nlohmann_json::nlohmann_json
+        IrpModel
+)
+
+add_executable(vehicle-remote
+        vehicle-remote.cpp
+        VehicleStreamingSimulator.cpp
+)
+
+target_include_directories(vehicle-remote PRIVATE
+        "${DEVS_SF_DIR}/include"
+        "${DEVS_SF_DIR}/include/devs"
+        "irpdomain"
+        "${PROJECT_SOURCE_DIR}/src/irpmodel"
+)
+
+target_compile_definitions(vehicle-remote PRIVATE TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+
+target_link_libraries(vehicle-remote PUBLIC
         "${DEVS_SF_DIR}/lib/libdevs_sf.a"
         nlohmann_json::nlohmann_json
         IrpModel
@@ -53,5 +95,27 @@ target_include_directories(irp-message-test PRIVATE
 
 target_link_libraries(irp-message-test PUBLIC
         "${DEVS_SF_DIR}/lib/libdevs_sf.a"
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(irp-delivery-route-test irpdomaintest/test_delivery_route.cpp)
+target_include_directories(irp-delivery-route-test PRIVATE
+        "${DEVS_SF_DIR}/include"
+        "irpdomain"
+        "${PROJECT_SOURCE_DIR}/src/irpmodel"
+)
+target_link_libraries(irp-delivery-route-test PUBLIC
+        IrpModel
+        nlohmann_json::nlohmann_json
+)
+
+add_executable(irp-delivery-schedule-test irpdomaintest/test_delivery_schedule.cpp)
+target_include_directories(irp-delivery-schedule-test PRIVATE
+        "${DEVS_SF_DIR}/include"
+        "irpdomain"
+        "${PROJECT_SOURCE_DIR}/src/irpmodel"
+)
+target_link_libraries(irp-delivery-schedule-test PUBLIC
+        IrpModel
         nlohmann_json::nlohmann_json
 )
