@@ -1,7 +1,7 @@
 # This version of cmake, and this branch, is optimized for codespaces and cmake v3.2
 # It may not work with environments set up for the other branches.
 
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 project(adevs_irp)
 
 set(CMAKE_CXX_STANDARD 17)
